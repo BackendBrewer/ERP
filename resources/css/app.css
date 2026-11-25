@@ -1,5 +1,33 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+    html.dark .bg-white { background-color: var(--color-slate-900); }
+    html.dark .bg-slate-50 { background-color: var(--color-slate-950); }
+    html.dark .bg-slate-100 { background-color: var(--color-slate-800); }
+    html.dark .text-slate-950,
+    html.dark .text-slate-900 { color: var(--color-slate-100); }
+    html.dark .text-slate-700 { color: var(--color-slate-200); }
+    html.dark .text-slate-600,
+    html.dark .text-slate-500 { color: var(--color-slate-400); }
+    html.dark .border-slate-200,
+    html.dark .border-slate-100 { border-color: var(--color-slate-800); }
+    html.dark [class~="hover:bg-slate-50"]:hover { background-color: var(--color-slate-800); }
+    html.dark .bg-indigo-50 { background-color: var(--color-indigo-950); }
+    html.dark .text-indigo-700 { color: var(--color-indigo-300); }
+    html.dark .bg-emerald-50 { background-color: var(--color-emerald-950); }
+    html.dark .text-emerald-700,
+    html.dark .text-emerald-800 { color: var(--color-emerald-300); }
+    html.dark .text-emerald-950 { color: var(--color-emerald-100); }
+    html.dark .border-emerald-200 { border-color: var(--color-emerald-900); }
+    html.dark .bg-amber-50 { background-color: var(--color-amber-950); }
+    html.dark .text-amber-700,
+    html.dark .text-amber-800 { color: var(--color-amber-300); }
+    html.dark .text-amber-950 { color: var(--color-amber-100); }
+    html.dark .border-amber-200 { border-color: var(--color-amber-900); }
+}
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 

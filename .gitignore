@@ -25,3 +25,29 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Local development artifacts
+.phpunit.cache/
+.phpunit.result.cache
+/.idea/
+/.fleet/
+/.vscode/
+/auth.json
+/npm-debug.log*
+/yarn-error.log*
+/pnpm-debug.log*
+/coverage/
+/public/hot
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*.log
+# Environment-specific configuration; keep only the safe example file in source control.
+/.env.*
+!/.env.example
+/.env
+/database/*.sqlite
+.DS_Store
+Thumbs.db
+

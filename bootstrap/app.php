@@ -4,6 +4,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use App\Http\Middleware\ResolveCurrentInstitute;
+use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureInstituteRole;
+use App\Http\Middleware\EnsureInstitutePermission;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,7 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'tenant' => ResolveCurrentInstitute::class,
+            'super-admin' => EnsureSuperAdmin::class,
+            'institute-role' => EnsureInstituteRole::class,
+            'permission' => EnsureInstitutePermission::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
