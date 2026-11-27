@@ -1,0 +1,53 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SuperAdmin\AcademyController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SuperAdmin\InstituteAdminController;
+use App\Http\Controllers\Institute\AcademicSetupController;
+use App\Http\Controllers\Institute\SubjectController;
+use App\Http\Controllers\Institute\SubjectGroupController;
+use App\Http\Controllers\Institute\AdmissionInquiryController;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::view('/super-admin', 'super-admin.dashboard')->middleware(['auth', 'can:access-super-admin'])->name('super-admin.dashboard');
+
+Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'can:access-super-admin'])->group(function () {
+
+    Route::view('/', 'super-admin.dashboard')->name('dashboard');
+
+    Route::resource('academies', AcademyController::class)->only(['index', 'create', 'store']);
+
+    Route::get('academies/{academy}/institute-admins/create', [InstituteAdminController::class, 'create'])->name('academies.institute-admins.create');
+
+    Route::post('academies/{academy}/institute-admins', [InstituteAdminController::class, 'store'])->name('academies.institute-admins.store');
+
+});
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
+
+Route::get('/institute/dashboard', [DashboardController::class, 'institute'])->middleware(['auth', 'can:access-institute-admin'])->name('institute.dashboard');
+
+Route::prefix('institute/academic-setup')->name('institute.academic-setup.')->middleware(['auth', 'can:access-institute-admin'])->group(function () {
+
+    Route::get('/', [AcademicSetupController::class, 'index'])->name('index');
+
+    Route::post('/classes', [AcademicSetupController::class, 'storeClass'])->name('classes.store');
+
+    Route::post('/sections', [AcademicSetupController::class, 'storeSection'])->name('sections.store');
+});
+
+Route::prefix('institute')->name('institute.')->middleware(['auth', 'can:access-institute-admin'])->group(function () {
+
+    Route::resource('subjects', SubjectController::class)->only(['index', 'store']);
+    Route::resource('subject-groups', SubjectGroupController::class)->only(['index', 'store']);
+    Route::resource('admission-inquiries', AdmissionInquiryController::class)->only(['index', 'store']);
+});
+
+Route::middleware(['auth', 'can:access-institute-admin'])->group(function () {
+    Route::get('/subject-groups', fn () => redirect()->route('institute.subject-groups.index'));
+    Route::post('/subject-groups', [SubjectGroupController::class, 'store']);
+});
