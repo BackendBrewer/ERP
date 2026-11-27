@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
@@ -28,14 +28,9 @@
                     ['Workspace', [
                         ['Overview', 'institute.dashboard', 'institute.dashboard', 'home'],
                     ]],
-                    ['Academic setup', [
-                        ['Classes & Sections', 'institute.academic-setup.index', 'institute.academic-setup.*', 'grid'],
-                        ['Subjects', 'institute.subjects.index', 'institute.subjects.*', 'book'],
-                        ['Subject Groups', 'institute.subject-groups.index', 'institute.subject-groups.*', 'layers'],
-                    ]],
-                    ['Admissions', [
-                        ['Admission Inquiries', 'institute.admission-inquiries.index', 'institute.admission-inquiries.*', 'school'],
-                        ['Students', 'institute.students.index', 'institute.students.*', 'school'],
+                    ['Management', [
+                        ['Academic Setup', 'institute.academic-setup.index', ['institute.academic-setup.*', 'institute.subjects.*', 'institute.subject-groups.*'], 'grid'],
+                        ['Admissions & Students', 'institute.students.index', ['institute.students.*', 'institute.admission-inquiries.*', 'institute.admissions.*'], 'school'],
                     ]],
                 ];
         @endphp
@@ -58,7 +53,7 @@
                     @foreach ($navigation as [$group, $items])
                         <p class="nav-caption">{{ $group }}</p>
                         @foreach ($items as [$label, $target, $pattern, $icon])
-                            @php($active = request()->routeIs($pattern))
+                            @php($active = request()->routeIs(...(array) $pattern))
                             <a @class(['nav-link', 'active' => $active]) href="{{ route($target) }}"
                                aria-label="{{ $label }}" title="{{ $label }}"
                                @if ($active) aria-current="{{ request()->routeIs($target) ? 'page' : 'true' }}" @endif>

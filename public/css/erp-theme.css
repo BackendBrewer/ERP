@@ -360,3 +360,32 @@ svg { display: block; }
     a { color: inherit; text-decoration: none; }
     @page { size: A4; margin: 16mm; }
 }
+
+.workflow-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-block: 0 1rem;
+}
+
+.workflow-fieldset {
+    display: grid;
+    min-width: 0;
+    gap: .85rem;
+    margin: 0;
+    padding: 1rem 0;
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.workflow-fieldset legend { font-weight: 700; padding-right: .5rem; }
+.workflow-fieldset summary, .student-details + details summary { cursor: pointer; font-weight: 650; }
+.workflow-fieldset details[open] summary, .student-details + details[open] summary { margin-bottom: .75rem; }
+.directory-filters { padding: 0 1rem 1rem; }
+.directory-filters .table-toolbar { padding-inline: 0; }
+.directory-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: .75rem; }
+.directory-feedback { margin: 0; padding: .65rem 1rem; }
+.student-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: .4rem .75rem; }
+.student-details dt { font-weight: 650; }
+.student-details dd { margin: 0; overflow-wrap: anywhere; }
+#enrollment-action { margin-bottom: 1rem; scroll-margin-top: 5rem; }

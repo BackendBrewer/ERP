@@ -2,37 +2,19 @@
 
 namespace App\Http\Requests\Institute;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class StoreAdmissionRequest extends FormRequest
+class StoreAdmissionRequest extends StudentDetailsRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user()?->can('access-institute-admin') ?? false;
-    }
-
     public function rules(): array
     {
-        return [
-            'student_name' => ['required', 'string', 'max:150'],
-            'guardian_name' => ['nullable', 'string', 'max:150'],
-            'contact_phone' => [
-                'required',
-                'string',
-                'max:25',
-                'regex:/\A\+?[0-9](?:[0-9 ()-]*[0-9])?\z/',
-            ],
+        return parent::rules() + [
             'academy_class_id' => ['required', 'integer', 'min:1'],
             'section_id' => ['required', 'integer', 'min:1'],
             'subject_group_id' => ['nullable', 'integer', 'min:1'],
-            'admitted_on' => ['required', 'date_format:Y-m-d'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'contact_phone.regex' => 'Enter a contact number such as 0300 1234567.',
+            'admitted_on' => ['required', 'date_format:Y-m-d', ...($this->filled('date_of_birth') ? ['after_or_equal:date_of_birth'] : [])],
+            'attendance_starts_on' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:admitted_on'],
+            'roll_number' => ['nullable', 'string', 'max:40'],
+            'subject_ids' => ['sometimes', 'array', 'list'],
+            'subject_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
         ];
     }
 }

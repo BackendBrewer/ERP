@@ -2,7 +2,17 @@
 
 document.querySelectorAll('[data-admission-form]').forEach((form) => {
     const classSelect = form.querySelector('[data-admission-class]');
+    const group = form.querySelector('[data-admission-group]');
+    const preview = form.querySelector('[data-group-preview]');
     const dependentSelects = form.querySelectorAll('[data-admission-dependent]');
+
+    function updatePreview() {
+        if (!preview || !group) return;
+
+        const description = group.selectedOptions[0]?.dataset.groupSubjects;
+        preview.hidden = !description;
+        preview.textContent = description ? 'Group subjects: ' + description : '';
+    }
 
     function updateOptions() {
         dependentSelects.forEach((select) => {
@@ -18,8 +28,10 @@ document.querySelectorAll('[data-admission-form]').forEach((form) => {
                 }
             });
         });
+        updatePreview();
     }
 
+    group?.addEventListener('change', updatePreview);
     classSelect.addEventListener('change', updateOptions);
     updateOptions();
 });

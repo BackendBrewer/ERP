@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Institute;
 
+use App\Actions\Institute\ResolveEnrollmentPlacement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Institute\StoreAdmissionRequest;
 use App\Models\Academy;
@@ -29,75 +30,69 @@ class AdmissionController extends Controller
         }
 
         $classes = $academy->classes()
-            ->with(['sections:id,academy_class_id,name', 'subjectGroups:id,academy_class_id,name'])
+            ->with([
+                'sections:id,academy_class_id,name',
+                'subjectGroups:id,academy_class_id,name',
+                'subjectGroups.subjects:id,name',
+            ])
             ->orderBy('name')
             ->get(['id', 'name']);
 
         return view('institute.admissions.create', [
             'source' => $source,
             'classes' => $classes,
+            'subjects' => $academy->subjects()->orderBy('name')->get(['id', 'name']),
+            'showGroupPreview' => true,
         ]);
     }
 
-    public function store(StoreAdmissionRequest $request, ?string $inquiry = null): RedirectResponse
+    public function store(StoreAdmissionRequest $request, ResolveEnrollmentPlacement $resolvePlacement, ?string $inquiry = null): RedirectResponse
     {
         $user = $request->user();
         $academy = $user->academy()->firstOrFail();
         $source = $this->findInquiry($academy, $inquiry);
         $data = $request->validated();
 
-        $class = $academy->classes()->find($data['academy_class_id']);
-
-        if ($class === null) {
-            throw ValidationException::withMessages([
-                'academy_class_id' => 'Select a class from your academy.',
-            ]);
-        }
-
-        if (! $class->sections()->whereKey($data['section_id'])->exists()) {
-            throw ValidationException::withMessages([
-                'section_id' => 'Select a section from the chosen class.',
-            ]);
-        }
-
-        $groupId = $data['subject_group_id'] ?? null;
-
-        if ($groupId !== null && ! $class->subjectGroups()->whereKey($groupId)->exists()) {
-            throw ValidationException::withMessages([
-                'subject_group_id' => 'Select a subject group from the chosen class.',
-            ]);
-        }
+        $placement = $resolvePlacement($academy, $data);
+        $studentDetails = $request->studentAttributes();
 
         try {
-            $student = DB::transaction(function () use ($academy, $user, $source, $data, $groupId): Student {
-                $student = new Student([
-                    'name' => $data['student_name'],
-                    'guardian_name' => $data['guardian_name'] ?? null,
-                    'contact_phone' => $data['contact_phone'],
-                ]);
-                $student->academy_id = $academy->id;
-                $student->save();
+            $student = DB::transaction(function () use ($academy, $user, $source, $data, $placement, $studentDetails): Student {
+                $student = $academy->students()->create($studentDetails);
 
                 $enrollment = new Enrollment();
-                $enrollment->section_id = $data['section_id'];
-                $enrollment->subject_group_id = $groupId;
+                $enrollment->section_id = $placement['section_id'];
+                $enrollment->subject_group_id = $placement['subject_group_id'];
                 $enrollment->admission_inquiry_id = $source?->id;
                 $enrollment->created_by = $user->id;
                 $enrollment->admitted_on = $data['admitted_on'];
 
+                $enrollment->roll_number = $data['roll_number'] ?? null;
+                $enrollment->attendance_starts_on = $data['attendance_starts_on'] ?? $data['admitted_on'];
                 $student->enrollments()->save($enrollment);
+                $enrollment->subjects()->attach($placement['subject_ids']);
 
                 return $student;
             });
         } catch (UniqueConstraintViolationException $exception) {
-            if (! $source?->enrollment()->exists()) {
-                throw $exception;
+            if ($source?->enrollment()->exists()) {
+                return redirect()->route('institute.admission-inquiries.index')
+                    ->with('status', 'This inquiry has already been admitted.');
             }
 
-            return redirect()->route('institute.admission-inquiries.index')->with('status', 'This inquiry has already been admitted.');
+            $number = $data['admission_number'] ?? null;
+
+            if ($number !== null && $academy->students()->where('admission_number', $number)->exists()) {
+                throw ValidationException::withMessages([
+                    'admission_number' => 'This admission number is already in use in your academy.',
+                ]);
+            }
+
+            throw $exception;
         }
 
-        return redirect()->route('institute.students.index', ['student' => $student->id])->with('status', "Admission saved. Student ID: {$student->id}.");
+        return redirect()->route('institute.students.show', $student->id)
+            ->with('status', 'Admission saved.');
     }
 
     private function findInquiry(Academy $academy, ?string $inquiry): ?AdmissionInquiry

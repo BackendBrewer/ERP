@@ -1,10 +1,19 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Subjects')
 
 @section('content')
     <x-page-header title="Subjects" description="Maintain the subjects offered by your academy." eyebrow="Academic setup"
         :breadcrumbs="[['label' => 'Workspace', 'url' => route('institute.dashboard')], ['label' => 'Subjects']]" />
+    @include('partials.workflow-tabs', [
+        'label' => 'Academic setup',
+        'tabs' => [
+            ['Classes & Sections', 'institute.academic-setup.index'],
+            ['Subjects', 'institute.subjects.index'],
+            ['Subject Groups', 'institute.subject-groups.index'],
+        ],
+    ])
+
     @include('partials.status')
 
     <div class="management-grid">

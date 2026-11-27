@@ -9,6 +9,15 @@
         eyebrow="Academic setup"
         :breadcrumbs="[['label' => 'Workspace', 'url' => route('institute.dashboard')], ['label' => 'Subject Groups']]"
     />
+    @include('partials.workflow-tabs', [
+        'label' => 'Academic setup',
+        'tabs' => [
+            ['Classes & Sections', 'institute.academic-setup.index'],
+            ['Subjects', 'institute.subjects.index'],
+            ['Subject Groups', 'institute.subject-groups.index'],
+        ],
+    ])
+
     @include('partials.status')
 
     <div class="management-grid">

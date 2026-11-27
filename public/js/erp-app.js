@@ -162,13 +162,34 @@
     });
 
     document.querySelectorAll('form[data-loading-form]').forEach((form) => {
-        form.addEventListener('submit', () => {
-            if (!form.checkValidity()) return;
-            const button = form.querySelector('button[type="submit"]');
+        let pending;
+
+        form.addEventListener('submit', (event) => {
+            if (event.defaultPrevented) return;
+            if (pending) {
+                event.preventDefault();
+                return;
+            }
+
+            const button = event.submitter ?? form.querySelector('button[type="submit"]');
             if (!(button instanceof HTMLButtonElement)) return;
-            button.disabled = true;
-            button.dataset.originalText = button.textContent.trim();
-            button.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Processing…</span>';
+
+            pending = { button, children: [...button.childNodes] };
+            button.setAttribute('aria-disabled', 'true');
+            form.setAttribute('aria-busy', 'true');
+
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            spinner.setAttribute('aria-hidden', 'true');
+            button.replaceChildren(spinner, document.createTextNode('Processing…'));
+        });
+
+        window.addEventListener('pageshow', () => {
+            if (!pending) return;
+            pending.button.replaceChildren(...pending.children);
+            pending.button.removeAttribute('aria-disabled');
+            form.removeAttribute('aria-busy');
+            pending = null;
         });
     });
 

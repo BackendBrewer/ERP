@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Admission Inquiries')
 
@@ -17,6 +17,14 @@
             Direct Admission <x-icon name="arrow-right" />
         </a>
     </x-page-header>
+
+    @include('partials.workflow-tabs', [
+        'label' => 'Admissions',
+        'tabs' => [
+            ['Students', 'institute.students.index'],
+            ['Admission Inquiries', 'institute.admission-inquiries.index'],
+        ],
+    ])
 
     @include('partials.status')
 

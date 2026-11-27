@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Enrollment extends Model
 {
@@ -12,6 +13,7 @@ class Enrollment extends Model
         return [
             'admitted_on' => 'date',
             'ended_on' => 'date',
+            'attendance_starts_on' => 'date',
         ];
     }
 
@@ -24,5 +26,9 @@ class Enrollment extends Model
     {
         return $this->belongsTo(SubjectGroup::class);
     }
-    
+
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class);
+    }
 }

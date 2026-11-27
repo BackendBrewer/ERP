@@ -8,7 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Model
 {
-    protected $fillable = ['name', 'guardian_name', 'contact_phone'];
+    protected $fillable = [
+        'name', 'guardian_name', 'contact_phone', 'student_phone', 'guardian_phone',
+        'whatsapp_phone', 'admission_number', 'date_of_birth', 'gender', 'address', 'email',
+    ];
+
+    protected function casts(): array
+    {
+        return ['date_of_birth' => 'date'];
+    }
 
     public function enrollments(): HasMany
     {

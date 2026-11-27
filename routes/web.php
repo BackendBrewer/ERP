@@ -16,7 +16,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::view('/super-admin', 'super-admin.dashboard')->middleware(['auth', 'can:access-super-admin'])->name('super-admin.dashboard');
 
 Route::prefix('super-admin')->name('super-admin.')->middleware(['auth', 'can:access-super-admin'])->group(function () {
 
@@ -52,6 +51,7 @@ Route::prefix('institute')->name('institute.')->middleware(['auth', 'can:access-
     Route::post('admissions/{inquiry?}', [AdmissionController::class, 'store'])->whereNumber('inquiry')->name('admissions.store');
     Route::get('students', [StudentController::class, 'index'])->name('students.index');
     Route::get('students/{student}', [StudentController::class, 'show'])->whereNumber('student')->name('students.show');
+    Route::patch('students/{student}', [StudentController::class, 'update'])->whereNumber('student')->name('students.update');
     Route::get('students/{student}/enrollment/{action}', [EnrollmentLifecycleController::class, 'create'])->whereNumber('student')->whereIn('action', ['transfer', 'withdraw', 'rejoin'])->name('students.enrollment.create');
     Route::post('students/{student}/enrollment/{action}', [EnrollmentLifecycleController::class, 'store'])->whereNumber('student')->whereIn('action', ['transfer', 'withdraw', 'rejoin'])->name('students.enrollment.store');
 });

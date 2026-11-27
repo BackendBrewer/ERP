@@ -20,90 +20,37 @@
               data-loading-form data-admission-form>
             @csrf
 
-            <div class="form-grid">
-                @foreach ([
-                    ['student_name', 'Student name', $source?->student_name, 150, true, 'text'],
-                    ['guardian_name', 'Guardian name', $source?->guardian_name, 150, false, 'text'],
-                    ['contact_phone', 'Contact number', $source?->contact_phone, 25, true, 'tel'],
-                ] as [$field, $label, $default, $length, $required, $type])
-                    <div class="field">
-                        <label for="{{ $field }}">
-                            {{ $label }}
-                            @if ($required)<span class="required-mark" aria-hidden="true">*</span>@endif
-                        </label>
-                        <input id="{{ $field }}" name="{{ $field }}" type="{{ $type }}"
-                               value="{{ old($field, $default) }}" maxlength="{{ $length }}"
-                               @if ($required) required @endif
-                               @error($field) aria-invalid="true" aria-describedby="{{ $field }}-error" @enderror>
-                        @error($field)
-                            <p class="field-error" id="{{ $field }}-error" role="alert">{{ $message }}</p>
-                        @enderror
-                    </div>
-                @endforeach
+            @include('institute.students.partials.details-fields', ['record' => null])
 
-                <div class="field">
-                    <label for="admitted_on">Admission date</label>
-                    <input id="admitted_on" name="admitted_on" type="date"
-                           value="{{ old('admitted_on', today('Asia/Karachi')->toDateString()) }}" required>
-                    @error('admitted_on')
-                        <p class="field-error" role="alert">{{ $message }}</p>
-                    @enderror
+            <fieldset class="workflow-fieldset">
+                <legend>Academic details</legend>
+                @include('institute.students.partials.placement', ['defaultClassId' => $source?->academy_class_id])
+
+                <div class="form-grid">
+                    @include('institute.students.partials.field', ['key' => 'admitted_on', 'label' => 'Admission date', 'type' => 'date', 'value' => today('Asia/Karachi')->toDateString(), 'required' => true, 'length' => null])
+                    @include('institute.students.partials.field', ['key' => 'attendance_starts_on', 'label' => 'Attendance start date', 'type' => 'date', 'value' => null, 'required' => false, 'length' => null])
+                    @include('institute.students.partials.field', ['key' => 'roll_number', 'label' => 'Roll number', 'type' => 'text', 'value' => null, 'required' => false, 'length' => 40])
                 </div>
-            </div>
+                <p class="help">Attendance starts on the admission date if no start date is entered.</p>
 
-            <div class="form-grid">
-                <div class="field">
-                    <label for="academy_class_id">Class</label>
-                    <select id="academy_class_id" name="academy_class_id" required data-admission-class>
-                        <option value="">Select a class</option>
-                        @foreach ($classes as $class)
-                            <option value="{{ $class->id }}"
-                                @selected((string) old('academy_class_id', $source?->academy_class_id) === (string) $class->id)>
-                                {{ $class->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('academy_class_id')
-                        <p class="field-error" role="alert">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="field">
-                    <label for="section_id">Section</label>
-                    <select id="section_id" name="section_id" required data-admission-dependent>
-                        <option value="">Select a section</option>
-                        @foreach ($classes as $class)
-                            @foreach ($class->sections as $section)
-                                <option value="{{ $section->id }}" data-class-id="{{ $class->id }}"
-                                    @selected((string) old('section_id') === (string) $section->id)>
-                                    {{ $class->name }} — {{ $section->name }}
-                                </option>
+                @if ($subjects->isNotEmpty())
+                    <details @if ($errors->has('subject_ids') || $errors->has('subject_ids.*') || old('subject_ids')) open @endif>
+                        <summary>Individual subjects</summary>
+                        <p class="help">Select subjects to personalize this enrollment. With no picks, the subject group supplies the subjects.</p>
+                        <div class="subject-group-options">
+                            @foreach ($subjects as $subject)
+                                <label>
+                                    <input type="checkbox" name="subject_ids[]" value="{{ $subject->id }}"
+                                        @checked(in_array($subject->id, (array) old('subject_ids', [])))>
+                                    {{ $subject->name }}
+                                </label>
                             @endforeach
-                        @endforeach
-                    </select>
-                    @error('section_id')
-                        <p class="field-error" role="alert">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="field">
-                    <label for="subject_group_id">Subject group</label>
-                    <select id="subject_group_id" name="subject_group_id" data-admission-dependent>
-                        <option value="">No subject group</option>
-                        @foreach ($classes as $class)
-                            @foreach ($class->subjectGroups as $group)
-                                <option value="{{ $group->id }}" data-class-id="{{ $class->id }}"
-                                    @selected((string) old('subject_group_id') === (string) $group->id)>
-                                    {{ $class->name }} — {{ $group->name }}
-                                </option>
-                            @endforeach
-                        @endforeach
-                    </select>
-                    @error('subject_group_id')
-                        <p class="field-error" role="alert">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
+                        </div>
+                        @error('subject_ids')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                        @error('subject_ids.*')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+                    </details>
+                @endif
+            </fieldset>
 
             <div class="form-actions">
                 <button class="button button-primary" type="submit">
