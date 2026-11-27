@@ -8,6 +8,7 @@ use App\Http\Controllers\Institute\AcademicSetupController;
 use App\Http\Controllers\Institute\SubjectController;
 use App\Http\Controllers\Institute\SubjectGroupController;
 use App\Http\Controllers\Institute\AdmissionInquiryController;
+use App\Http\Controllers\Institute\AdmissionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,8 @@ Route::prefix('institute')->name('institute.')->middleware(['auth', 'can:access-
     Route::resource('subjects', SubjectController::class)->only(['index', 'store']);
     Route::resource('subject-groups', SubjectGroupController::class)->only(['index', 'store']);
     Route::resource('admission-inquiries', AdmissionInquiryController::class)->only(['index', 'store']);
+    Route::get('admissions/create/{inquiry?}', [AdmissionController::class, 'create'])->whereNumber('inquiry')->name('admissions.create');
+    Route::post('admissions/{inquiry?}', [AdmissionController::class, 'store'])->whereNumber('inquiry')->name('admissions.store');
 });
 
 Route::middleware(['auth', 'can:access-institute-admin'])->group(function () {

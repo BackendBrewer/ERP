@@ -26,6 +26,7 @@ class AdmissionInquiryController extends Controller
                 'contact_phone',
                 'follow_up_on',
             ])
+            ->withExists('enrollment')
             ->with('academyClass:id,name')
             ->orderByDesc('id')
             ->simplePaginate(15);

@@ -7,18 +7,31 @@
         title="Admission Inquiries"
         description="Record prospective students and schedule follow-ups."
         eyebrow="Admissions"
-        :breadcrumbs="[['label' => 'Workspace', 'url' => route('institute.dashboard')], ['label' => 'Admissions'], ['label' => 'Admission Inquiries']]"
-    />
+        :breadcrumbs="[
+            ['label' => 'Workspace', 'url' => route('institute.dashboard')],
+            ['label' => 'Admissions'],
+            ['label' => 'Admission Inquiries'],
+        ]"
+    >
+        <a class="button button-primary" href="{{ route('institute.admissions.create') }}">
+            Direct Admission <x-icon name="arrow-right" />
+        </a>
+    </x-page-header>
+
     @include('partials.status')
 
     <div class="management-grid">
         <x-card title="Saved inquiries" subtitle="Prospective students and their follow-up details." class="directory">
             <div class="table-toolbar">
                 <span class="muted">{{ $inquiries->count() }} shown on this page</span>
+
                 @if ($inquiries->count())
                     <label class="table-search">
                         <x-icon name="search" />
-                        <input type="search" data-table-search="admission-inquiries-table" placeholder="Search inquiries…" aria-label="Search admission inquiries">
+                        <input type="search"
+                               data-table-search="admission-inquiries-table"
+                               placeholder="Search inquiries…"
+                               aria-label="Search admission inquiries">
                     </label>
                 @endif
             </div>
@@ -26,14 +39,17 @@
             @if ($inquiries->count())
                 <div class="table-wrap">
                     <table class="directory-table" id="admission-inquiries-table" data-global-searchable>
-                        <caption class="sr-only">Saved admission inquiries and follow-up dates</caption>
+                        <caption class="sr-only">Saved admission inquiries, follow-up dates and admission status</caption>
+
                         <thead>
                             <tr>
                                 <th scope="col">Prospective student</th>
                                 <th scope="col">Interested class</th>
                                 <th scope="col">Follow-up</th>
+                                <th scope="col">Admission</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             @foreach ($inquiries as $inquiry)
                                 <tr data-searchable>
@@ -46,20 +62,35 @@
                                             </span>
                                         </span>
                                     </th>
+
                                     <td>{{ $inquiry->academyClass?->name ?? 'Class not confirmed' }}</td>
+
                                     <td>
                                         @if ($inquiry->follow_up_on)
-                                            <time class="badge badge-warning" datetime="{{ $inquiry->follow_up_on->toDateString() }}">
+                                            <time class="badge badge-warning"
+                                                  datetime="{{ $inquiry->follow_up_on->toDateString() }}">
                                                 {{ $inquiry->follow_up_on->format('d M Y') }}
                                             </time>
                                         @else
                                             <span class="muted">Not scheduled</span>
                                         @endif
                                     </td>
+
+                                    <td>
+                                        @if ($inquiry->enrollment_exists)
+                                            <x-status-badge label="Admitted" variant="success" />
+                                        @else
+                                            <a class="button button-secondary"
+                                               href="{{ route('institute.admissions.create', ['inquiry' => $inquiry->id]) }}">
+                                                Convert to Admission<span class="sr-only"> for {{ $inquiry->student_name }}</span>
+                                            </a>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
                     <div class="search-empty" data-search-empty hidden>No inquiries match your search.</div>
                 </div>
             @else
@@ -141,7 +172,9 @@
                     @enderror
                 </div>
 
-                <button class="button button-primary" type="submit">Save inquiry <x-icon name="arrow-right" /></button>
+                <button class="button button-primary" type="submit">
+                    Save inquiry <x-icon name="arrow-right" />
+                </button>
             </form>
         </x-card>
     </div>
