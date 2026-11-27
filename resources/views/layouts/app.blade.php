@@ -35,6 +35,7 @@
                     ]],
                     ['Admissions', [
                         ['Admission Inquiries', 'institute.admission-inquiries.index', 'institute.admission-inquiries.*', 'school'],
+                        ['Students', 'institute.students.index', 'institute.students.*', 'school'],
                     ]],
                 ];
         @endphp

@@ -97,7 +97,7 @@ class AdmissionController extends Controller
             return redirect()->route('institute.admission-inquiries.index')->with('status', 'This inquiry has already been admitted.');
         }
 
-        return redirect()->route('institute.admission-inquiries.index')->with('status', "Admission saved. Student ID: {$student->id}.");
+        return redirect()->route('institute.students.index', ['student' => $student->id])->with('status', "Admission saved. Student ID: {$student->id}.");
     }
 
     private function findInquiry(Academy $academy, ?string $inquiry): ?AdmissionInquiry

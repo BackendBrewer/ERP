@@ -9,6 +9,8 @@ use App\Http\Controllers\Institute\SubjectController;
 use App\Http\Controllers\Institute\SubjectGroupController;
 use App\Http\Controllers\Institute\AdmissionInquiryController;
 use App\Http\Controllers\Institute\AdmissionController;
+use App\Http\Controllers\Institute\StudentController;
+use App\Http\Controllers\Institute\EnrollmentLifecycleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,6 +50,10 @@ Route::prefix('institute')->name('institute.')->middleware(['auth', 'can:access-
     Route::resource('admission-inquiries', AdmissionInquiryController::class)->only(['index', 'store']);
     Route::get('admissions/create/{inquiry?}', [AdmissionController::class, 'create'])->whereNumber('inquiry')->name('admissions.create');
     Route::post('admissions/{inquiry?}', [AdmissionController::class, 'store'])->whereNumber('inquiry')->name('admissions.store');
+    Route::get('students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('students/{student}', [StudentController::class, 'show'])->whereNumber('student')->name('students.show');
+    Route::get('students/{student}/enrollment/{action}', [EnrollmentLifecycleController::class, 'create'])->whereNumber('student')->whereIn('action', ['transfer', 'withdraw', 'rejoin'])->name('students.enrollment.create');
+    Route::post('students/{student}/enrollment/{action}', [EnrollmentLifecycleController::class, 'store'])->whereNumber('student')->whereIn('action', ['transfer', 'withdraw', 'rejoin'])->name('students.enrollment.store');
 });
 
 Route::middleware(['auth', 'can:access-institute-admin'])->group(function () {
